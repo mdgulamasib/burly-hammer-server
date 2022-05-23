@@ -79,11 +79,26 @@ async function run() {
             res.json(result);
         });
 
+        //myorder data calling based on email match
+        app.get('/myorders', JWTVerify, async (req, res) => {
+            const email = req.query.email;
+            const decodedEmail = req.decoded.email;
+            console.log(decodedEmail, email)
+            if (email === decodedEmail) {
+                const query = { email: email };
+                const cursor = orderCollection.find(query);
+                const orders = await cursor.toArray();
+                await res.send(orders);
+            }
+            else {
+                res.status(403).send({ message: 'forbidden access' })
+            }
+        })
 
         // JWT TOken auth connection
         app.post('/login', async (req, res) => {
             const user = req.body;
-            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN, {
                 expiresIn: '1d'
             });
             res.send({ accessToken });

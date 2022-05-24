@@ -41,6 +41,20 @@ async function run() {
         const reviewsCollection = client.db('burlydB').collection('reviews');
         const userCollection = client.db('burlydB').collection('users');
 
+
+        const verifyAdmin = async (req, JWTVerify, res, next) => {
+            const requester = req.decoded?.email;
+            console.log(requester)
+            const requesterAccount = await userCollection.findOne({ email: requester });
+            console.log(requesterAccount)
+            if (requesterAccount.role === 'admin') {
+                next();
+            }
+            else {
+                res.status(403).send({ message: 'forbidden' });
+            }
+        }
+
         //products loading
         app.get('/products', async (req, res) => {
             const query = {};
@@ -97,12 +111,20 @@ async function run() {
                 const query = { email: email };
                 const cursor = orderCollection.find(query);
                 const orders = await cursor.toArray();
-                await res.send(orders);
+                res.send(orders);
             }
             else {
                 res.status(403).send({ message: 'forbidden access' })
             }
         })
+
+        //load all orders
+        app.get('/allorders', JWTVerify, verifyAdmin, async (req, res) => {
+            const orders = await orderCollection.find().toArray();
+            res.send(orders);
+        })
+
+
 
         //posting review to server
         app.post("/reviews", async (req, res) => {
@@ -140,7 +162,7 @@ async function run() {
         });
 
         // Making an admin 
-        app.put('/user/admin/:email', JWTVerify, async (req, res) => {
+        app.put('/user/admin/:email', JWTVerify, verifyAdmin, async (req, res) => {
             const email = req.params.email;
             const filter = { email: email };
             const updateDoc = {

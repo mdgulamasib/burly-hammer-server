@@ -39,6 +39,7 @@ async function run() {
         await client.connect();
         const productCollection = client.db('burlydB').collection('products');
         const orderCollection = client.db('burlydB').collection('orders');
+        const reviewsCollection = client.db('burlydB').collection('reviews');
 
         //products loading
         app.get('/products', async (req, res) => {
@@ -94,6 +95,13 @@ async function run() {
                 res.status(403).send({ message: 'forbidden access' })
             }
         })
+
+        //
+        app.post("/reviews", async (req, res) => {
+            const review = req.body;
+            const result = await reviewsCollection.insertOne(review);
+            res.json(result);
+        });
 
         // JWT TOken auth connection
         app.post('/login', async (req, res) => {

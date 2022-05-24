@@ -111,6 +111,14 @@ async function run() {
             res.json(result);
         });
 
+
+        //posting new product to server
+        app.post("/products", async (req, res) => {
+            const product = req.body;
+            const result = await productCollection.insertOne(product);
+            res.json(result);
+        });
+
         //user sending to server 
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;

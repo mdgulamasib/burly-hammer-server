@@ -40,6 +40,7 @@ async function run() {
         const productCollection = client.db('burlydB').collection('products');
         const orderCollection = client.db('burlydB').collection('orders');
         const reviewsCollection = client.db('burlydB').collection('reviews');
+        const userCollection = client.db('burlydB').collection('users');
 
         //products loading
         app.get('/products', async (req, res) => {
@@ -111,6 +112,45 @@ async function run() {
             const result = await reviewsCollection.insertOne(review);
             res.json(result);
         });
+
+        //user sending to server 
+        app.put('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user,
+            };
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            const token = jwt.sign({ email: email }, process.env.ACCESS_TOKEN, { expiresIn: '1h' })
+            res.send({ result, token });
+        });
+
+        // loading user data 
+        app.get('/user', JWTVerify, async (req, res) => {
+            const users = await userCollection.find().toArray();
+            res.send(users);
+        });
+
+        // Making an admin 
+        app.put('/user/admin/:email', JWTVerify, async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const updateDoc = {
+                $set: { role: 'admin' },
+            };
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
+
+        //finding admin based on role
+        app.get('/admin/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = await userCollection.findOne({ email: email });
+            const isAdmin = user.role === 'admin';
+            res.send({ admin: isAdmin })
+        })
 
         // JWT TOken auth connection
         app.post('/login', async (req, res) => {

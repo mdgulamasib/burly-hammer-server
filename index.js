@@ -14,7 +14,6 @@ app.use(express.json());
 
 function JWTVerify(req, res, next) {
     const authHeader = req.headers.authorization;
-    console.log(authHeader)
     if (!authHeader) {
         return res.status(401).send({ message: 'unauthorized access' })
     }
@@ -94,7 +93,6 @@ async function run() {
         app.get('/myorders', JWTVerify, async (req, res) => {
             const email = req.query.email;
             const decodedEmail = req.decoded.email;
-            console.log(decodedEmail, email)
             if (email === decodedEmail) {
                 const query = { email: email };
                 const cursor = orderCollection.find(query);
@@ -150,6 +148,15 @@ async function run() {
             const user = await userCollection.findOne({ email: email });
             const isAdmin = user.role === 'admin';
             res.send({ admin: isAdmin })
+        })
+
+        // deleting product from all item list
+        app.delete('/products/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            console.log(id, query)
+            const result = await productCollection.deleteOne(query);
+            res.send(result);
         })
 
         // JWT TOken auth connection

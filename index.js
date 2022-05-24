@@ -50,6 +50,15 @@ async function run() {
 
         })
 
+        //review loading
+        app.get('/reviews', async (req, res) => {
+            const query = {};
+            const cursor = reviewsCollection.find(query);
+            const reviews = await cursor.toArray();
+            res.send(reviews);
+
+        })
+
         //purchase single data loading
         app.get('/products/:id', async (req, res) => {
             const id = req.params.id;
@@ -96,7 +105,7 @@ async function run() {
             }
         })
 
-        //
+        //posting review to server
         app.post("/reviews", async (req, res) => {
             const review = req.body;
             const result = await reviewsCollection.insertOne(review);

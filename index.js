@@ -3,6 +3,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const stripe = require('stripe')(process.env.STRIPE_SECRET)
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -40,6 +41,7 @@ async function run() {
         const orderCollection = client.db('burlydB').collection('orders');
         const reviewsCollection = client.db('burlydB').collection('reviews');
         const userCollection = client.db('burlydB').collection('users');
+        const paymentCollection = client.db('burlydB').collection('payments');
 
 
         const verifyAdmin = async (req, JWTVerify, res, next) => {
@@ -118,6 +120,33 @@ async function run() {
             }
         })
 
+        //patching data for updating 
+        app.patch('/orders/:id', JWTVerify, async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+
+            const result = await paymentCollection.insertOne(payment);
+            const updatingPayment = await orderCollection.updateOne(filter, updatedDoc);
+            res.send(updatingPayment);
+        })
+
+
+        //individual order for payment
+        app.get('/payment/:id', JWTVerify, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const order = await orderCollection.findOne(query);
+            res.send(order);
+        })
+
+
         //load all orders
         app.get('/allorders', JWTVerify, verifyAdmin, async (req, res) => {
             const orders = await orderCollection.find().toArray();
@@ -188,6 +217,20 @@ async function run() {
             const result = await productCollection.deleteOne(query);
             res.send(result);
         })
+
+        //payment intent api
+        app.post('/create-payment-intent', JWTVerify, async (req, res) => {
+            const service = req.body;
+            const price = service.totalPrice;
+            console.log(service, price)
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+            res.send({ clientSecret: paymentIntent.client_secret })
+        });
 
         // JWT TOken auth connection
         app.post('/login', async (req, res) => {

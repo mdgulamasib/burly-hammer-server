@@ -120,6 +120,14 @@ async function run() {
             }
         })
 
+        //cancel order delete from server 
+        app.delete('/myorders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await orderCollection.deleteOne(query);
+            res.send(result);
+        })
+
         //patching data for updating 
         app.patch('/orders/:id', JWTVerify, async (req, res) => {
             const id = req.params.id;
@@ -199,6 +207,21 @@ async function run() {
             };
             const result = await userCollection.updateOne(filter, updateDoc);
             res.send(result);
+        })
+
+        //find my information 
+        app.get('/myinfo', JWTVerify, async (req, res) => {
+            const email = req.query.email;
+            const decodedEmail = req.decoded.email;
+            if (email === decodedEmail) {
+                const query = { email: email };
+                const cursor = userCollection.find(query);
+                const myinfo = await cursor.toArray();
+                res.send(myinfo);
+            }
+            else {
+                res.status(403).send({ message: 'forbidden access' })
+            }
         })
 
         //finding admin based on role

@@ -223,6 +223,56 @@ async function run() {
                 res.status(403).send({ message: 'forbidden access' })
             }
         })
+        //updating phone number of a user
+        app.put('/number/:id', async (req, res) => {
+            const id = req.params.id;
+            const updateItem = req.body;
+            console.log(id, updateItem)
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    phone: updateItem.number,
+                }
+            };
+            const result = await userCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        })
+
+        //updating img of a user
+        app.put('/img/:id', async (req, res) => {
+            const id = req.params.id;
+            const image = req.body;
+            console.log(id, image)
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    image: image.imgurl,
+                }
+            };
+            console.log(updatedDoc)
+            const result = await userCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        })
+
+        //updating address of a user
+        app.put('/address/:id', async (req, res) => {
+            const id = req.params.id;
+            const address = req.body;
+            console.log(id, address)
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    address: address.location,
+                }
+            };
+            console.log(updatedDoc)
+            const result = await userCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        })
+
 
         //finding admin based on role
         app.get('/admin/:email', async (req, res) => {

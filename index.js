@@ -132,6 +132,21 @@ async function run() {
             res.send(result);
         })
 
+        //shipped status changing 
+
+        app.put('/myorders/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    ship: true
+                }
+            }
+            console.log(updatedDoc, filter, id)
+            const updatingPayment = await orderCollection.updateOne(filter, updatedDoc);
+            res.send(updatingPayment);
+        })
+
         //patching data for updating 
         app.patch('/orders/:id', JWTVerify, async (req, res) => {
             const id = req.params.id;

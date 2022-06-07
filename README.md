@@ -9,18 +9,17 @@
 
 ### Key features 
 
-- Full responsive design
-- Firebase auth system implemented for registration and login 
-- Legal user is able to order items from the site
-- Legal user is able to manage orders in dashboard
-- Legal user is able to add reviews 
-- admin has full power to add another use as an admin
-- Data served based on JWT token verification, ghost user are not able to get data from server. 
-- Users are able to register using email or direct login using google auth. 
-- User email must have to verified before processing to secure routes.
-- 
-- And many more...
-
+-	It is a mobile responsive web application for a Manufacturing company
+-	Website has two dashboards, one for client and another one for administration purpose.
+-	Users are able to navigate top products, company summary, reviews, etc. on home route.
+-	By Clicking buy now button takes to the order page, and user can’t order below minimum.
+-	User is able to manage his order, pay money using Card, delete order, and add reviews.
+-	User profile shows details about Log-In user (Both client or Admin sees their own details).
+-	Admin dashboard has manage all order, add admin, add product, manage all product route.
+-	Routes are separately protected for client and admin; one can’t see other role’s data. 
+-	Firebase auth is applied to manage user Log-In, Registration, and google Sign-In properly.
+-	JWT is implemented to protect unauthorize access to data from server.
+-	
 ### Server Technology
 
 - Express
